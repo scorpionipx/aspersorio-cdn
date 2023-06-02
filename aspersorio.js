@@ -188,6 +188,12 @@ function sprinkle_button_clicked_handler (request) {
     let response = request.responseText.split(',')
     let value = parseInt(response[0]);
     let auto_status = parseInt(response[1]);
+
+    if (auto_status) {
+        let btn = document.querySelector('#auto');
+        btn.innerText = `Auto [${auto_status}/10]`;
+    }
+
     console.log('auto status: ' + auto_status);
     for (let index=0; index < 10; index ++) {
         let btn = document.querySelector(`#b${index}`);
