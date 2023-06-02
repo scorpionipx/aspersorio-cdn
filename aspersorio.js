@@ -189,9 +189,12 @@ function sprinkle_button_clicked_handler (request) {
     let value = parseInt(response[0]);
     let auto_status = parseInt(response[1]);
 
+    let auto_btn = document.querySelector('#auto');
     if (auto_status) {
-        let btn = document.querySelector('#auto');
-        btn.innerText = `Auto [${auto_status}/10]`;
+        auto_btn.innerText = `Auto [${auto_status}/10]`;
+    }
+    else {
+        auto_btn.innerText = `Auto [off]`;
     }
 
     console.log('auto status: ' + auto_status);
