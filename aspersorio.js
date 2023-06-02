@@ -12,7 +12,7 @@ function init_app() {
     get_status();
     setInterval(
         get_status,
-        5000,
+        2000,
     )
 }
 
