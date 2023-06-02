@@ -8,6 +8,12 @@ let sprinkle_buttons = [];
 function init_app() {
     init_main_container();
     init_control_menu();
+
+    get_status();
+    setInterval(
+        get_status,
+        20000,
+    )
 }
 
 
@@ -76,6 +82,48 @@ function init_control_menu() {
     row.className = "row justify-content-center";
     row.appendChild(all_sprinkles_off_button)
     control_menu_container.appendChild(row);
+
+    let auto_sprinkles_button = document.createElement('div');
+    auto_sprinkles_button.id = 'auto';
+    auto_sprinkles_button.className = 'col-10 btn-dark btn-sprinkle m-1 rounded-sm';
+    auto_sprinkles_button.innerText = 'Auto';
+
+    auto_sprinkles_button.addEventListener('click', () => {
+       auto_sprinkles(auto_sprinkles_button);
+    })
+
+    row = document.createElement('div');
+    row.className = "row justify-content-center";
+    row.appendChild(auto_sprinkles_button)
+    control_menu_container.appendChild(row);
+}
+
+
+function auto_sprinkles(sprinkle_button) {
+    disable_input();
+    const request = new XMLHttpRequest();
+    request.timeout = 10000;
+
+    let url = `${window.location.host}auto`;
+    request.onload = () => {
+        if (request.readyState === 4) {
+            if (request.status === 200) {
+                sprinkle_button_clicked_handler(request);
+            } else {
+                sprinkle_button_clicked_error_handler(request);
+            }
+        }
+    };
+
+    request.onerror = () => {
+        sprinkle_button_clicked_error_handler(request);
+    };
+
+    request.ontimeout = () => {
+        sprinkle_button_clicked_timeout_handler(request);
+    };
+    request.open("GET", url, true);
+    request.send(null);
 }
 
 
@@ -137,7 +185,10 @@ function sprinkle_button_clicked(sprinkle_button) {
 
 
 function sprinkle_button_clicked_handler (request) {
-    let value = parseInt(request.responseText);
+    let response = request.responseText.split(',')
+    let value = parseInt(response[0]);
+    let auto_status = parseInt(response[1]);
+    console.log('auto status: ' + auto_status);
     for (let index=0; index < 10; index ++) {
         let btn = document.querySelector(`#b${index}`);
         if((value >> index) & 1) {
@@ -175,6 +226,34 @@ function sprinkle_button_clicked_error_handler (request) {
 
 function sprinkle_button_clicked_timeout_handler (request) {
     console.log('timeout');
+}
+
+
+function get_status() {
+    disable_input();
+    const request = new XMLHttpRequest();
+    request.timeout = 10000;
+
+    let url = `${window.location.host}get_status`;
+    request.onload = () => {
+        if (request.readyState === 4) {
+            if (request.status === 200) {
+                sprinkle_button_clicked_handler(request);
+            } else {
+                sprinkle_button_clicked_error_handler(request);
+            }
+        }
+    };
+
+    request.onerror = () => {
+        sprinkle_button_clicked_error_handler(request);
+    };
+
+    request.ontimeout = () => {
+        sprinkle_button_clicked_timeout_handler(request);
+    };
+    request.open("GET", url, true);
+    request.send(null);
 }
 
 
