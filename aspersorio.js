@@ -1,6 +1,7 @@
 let main_container;
 let title_container;
 let control_menu_container;
+let settings_container;
 
 let sprinkle_buttons = [];
 
@@ -8,11 +9,12 @@ let sprinkle_buttons = [];
 function init_app() {
     init_main_container();
     init_control_menu();
+    init_settings_menu();
 
     get_status();
     setInterval(
         get_status,
-        2000,
+        5000,
     )
 }
 
@@ -96,6 +98,97 @@ function init_control_menu() {
     row.className = "row justify-content-center";
     row.appendChild(auto_sprinkles_button)
     control_menu_container.appendChild(row);
+
+    let setting_button = document.createElement('div');
+    setting_button.id = 'settings';
+    setting_button.className = 'col-10 btn-dark btn-sprinkle m-1 rounded-sm';
+    setting_button.innerText = 'Settings';
+
+    setting_button.addEventListener('click', () => {
+        show_settings(setting_button);
+    })
+
+    row = document.createElement('div');
+    row.className = "row justify-content-center";
+    row.appendChild(setting_button)
+    control_menu_container.appendChild(row);
+}
+
+
+function init_settings_menu() {
+    settings_container = document.createElement('div');
+    settings_container.id = 'settings_container';
+    settings_container.className = 'container-fluid text-center d-none';
+    main_container.appendChild(settings_container);
+
+    let row = document.createElement('div');
+    row.className = 'row';
+    settings_container.appendChild(row);
+
+    let time_picker = document.createElement('input');
+    time_picker.id = 'max_time';
+    time_picker.setAttribute('type', 'time');
+    time_picker.step = '1';
+    row.appendChild(time_picker);
+
+    let label = document.createElement('label');
+    label.for = 'max_time';
+    label.innerText = 'ON Time';
+    row.appendChild(label);
+
+
+    row = document.createElement('div');
+    row.className = 'row';
+    settings_container.appendChild(row);
+
+    time_picker = document.createElement('input');
+    time_picker.id = 'start_time';
+    time_picker.setAttribute('type', 'time');
+    time_picker.step = '1';
+    row.appendChild(time_picker);
+
+    label = document.createElement('label');
+    label.for = 'start_time';
+    label.innerText = 'Start Time';
+    row.appendChild(label);
+
+    let submit_settings_button = document.createElement('button');
+    submit_settings_button.className = 'btn btn-dark btn-lg';
+    submit_settings_button.innerText = 'Submit Settings';
+
+    row = document.createElement('div');
+    row.className = 'row justify-content-center text-center';
+    settings_container.appendChild(row);
+    row.appendChild(submit_settings_button);
+}
+
+
+function show_settings(settings_button) {
+    settings_container.classList.toggle("d-none");
+
+    const request = new XMLHttpRequest();
+    request.timeout = 10000;
+
+    let url = `${window.location.host}get_settings`;
+    request.onload = () => {
+        if (request.readyState === 4) {
+            if (request.status === 200) {
+                settings_button_clicked_handler(request);
+            } else {
+                sprinkle_button_clicked_error_handler(request);
+            }
+        }
+    };
+
+    request.onerror = () => {
+        sprinkle_button_clicked_error_handler(request);
+    };
+
+    request.ontimeout = () => {
+        sprinkle_button_clicked_timeout_handler(request);
+    };
+    request.open("GET", url, true);
+    request.send(null);
 }
 
 
@@ -181,6 +274,25 @@ function sprinkle_button_clicked(sprinkle_button) {
     };
     request.open("GET", url, true);
     request.send(null);
+}
+
+function to_hm(total_seconds) {
+  const total_minutes = Math.floor(total_seconds / 60);
+
+  const seconds = total_seconds % 60;
+  const hours = Math.floor(total_minutes / 60);
+  const minutes = total_minutes % 60;
+
+  return { h: hours, m: minutes, s: seconds };
+}
+
+function settings_button_clicked_handler(request) {
+    let response = request.responseText.split(',')
+    let on_time = parseInt(response[0]);
+
+    let time_picker = document.querySelector('#max_time');
+    let conversion = to_hm(on_time);
+    time_picker.value = `${conversion.h}:${conversion.m}:${conversion.s}`;
 }
 
 
